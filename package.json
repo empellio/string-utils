@@ -1,0 +1,59 @@
+{
+  "name": "@empellio/string-utils",
+  "version": "0.1.0",
+  "description": "Lightweight, dependency-free string utilities for Node.js and TypeScript.",
+  "keywords": [
+    "string",
+    "utils",
+    "typescript",
+    "node",
+    "esm",
+    "cjs",
+    "slugify",
+    "case-convert",
+    "diacritics",
+    "escape",
+    "regex"
+  ],
+  "license": "MIT",
+  "author": "Empellio OSS",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/empellio/empellio-string-utils.git"
+  },
+  "homepage": "https://github.com/empellio/empellio-string-utils#readme",
+  "bugs": {
+    "url": "https://github.com/empellio/empellio-string-utils/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsup": "^8.0.1",
+    "typescript": "^5.5.4"
+  }
+}
