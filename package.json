@@ -19,11 +19,11 @@
   "author": "Empellio OSS",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/empellio/empellio-string-utils.git"
+    "url": "git+https://github.com/empellio/string-utils.git"
   },
-  "homepage": "https://github.com/empellio/empellio-string-utils#readme",
+  "homepage": "https://github.com/empellio/string-utils#readme",
   "bugs": {
-    "url": "https://github.com/empellio/empellio-string-utils/issues"
+    "url": "https://github.com/empellio/string-utils/issues"
   },
   "type": "module",
   "sideEffects": false,
