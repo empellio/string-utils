@@ -583,4 +583,118 @@ export function template(input: string, vars: Record<string, unknown>, options: 
   })
 }
 
+// Random utilities
+
+/** Try to obtain cryptographically strong random bytes using Web Crypto; fallback to Math.random. */
+export function randomBytes(size: number): Uint8Array {
+  const out = new Uint8Array(size)
+  const g: any = globalThis as any
+  const cryptoObj: any = g.crypto && (g.crypto.getRandomValues ? g.crypto : g.crypto.webcrypto)
+  if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
+    cryptoObj.getRandomValues(out)
+    return out
+  }
+  // Weak fallback
+  for (let i = 0; i < size; i++) out[i] = Math.floor(Math.random() * 256)
+  return out
+}
+
+export type RandomStringOptions = {
+  charset?: 'alphanumeric' | 'alphabetic' | 'numeric' | 'hex' | 'base64url' | 'ascii-printable' | string
+  secure?: boolean // if false, allow Math.random fallback even if crypto exists
+}
+
+const PRESET_CHARSETS: Record<string, string> = {
+  alphabetic: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  numeric: '0123456789',
+  alphanumeric: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  hex: '0123456789abcdef',
+  base64url: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',
+  'ascii-printable': "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+}
+
+/** Generate a random string of given length from a charset using unbiased sampling. */
+export function randomString(length: number, options: RandomStringOptions = {}): string {
+  const { charset = 'alphanumeric' } = options
+  const chars = typeof charset === 'string' && PRESET_CHARSETS[charset]
+    ? PRESET_CHARSETS[charset]
+    : typeof charset === 'string'
+      ? charset
+      : PRESET_CHARSETS.alphanumeric
+
+  if (length <= 0) return ''
+  if (chars.length < 2) throw new Error('Charset must contain at least 2 characters')
+
+  const output: string[] = new Array(length)
+  const charCount = chars.length
+  const maxByte = 256 - (256 % charCount) // rejection threshold to avoid modulo bias
+
+  let i = 0
+  while (i < length) {
+    const bytes = randomBytes(Math.ceil((length - i) * 1.2)) // overshoot to reduce loops
+    for (let j = 0; j < bytes.length && i < length; j++) {
+      const b = bytes[j]
+      if (b >= maxByte) continue
+      const idx = b % charCount
+      output[i++] = chars.charAt(idx)
+    }
+  }
+  return output.join('')
+}
+
+/** Cryptographically strong random integer in [min, max] inclusive using rejection sampling. */
+export function randomInt(min: number, max: number): number {
+  if (!Number.isFinite(min) || !Number.isFinite(max)) throw new Error('min/max must be finite numbers')
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  if (max < min) [min, max] = [max, min]
+  const range = max - min + 1
+  if (range <= 1) return min
+  const threshold = 0x100000000 % range
+  while (true) {
+    const bytes = randomBytes(4)
+    const val = (bytes[0] << 24 >>> 0) + (bytes[1] << 16) + (bytes[2] << 8) + (bytes[3] >>> 0)
+    if (val >= 0x100000000 - threshold) continue
+    return min + (val % range)
+  }
+}
+
+/** Random v4 UUID using native crypto.randomUUID when available; otherwise manual. */
+export function randomUUID(): string {
+  const g: any = globalThis as any
+  const c: any = g.crypto && (g.crypto.randomUUID ? g.crypto : g.crypto.webcrypto)
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID()
+  const b = randomBytes(16)
+  b[6] = (b[6] & 0x0f) | 0x40 // version 4
+  b[8] = (b[8] & 0x3f) | 0x80 // variant 10
+  const hex = Array.from(b, x => x.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`
+}
+
+/** Random hexadecimal string of exact length. */
+export function randomHex(length = 32): string {
+  if (length <= 0) return ''
+  const bytes = randomBytes(Math.ceil(length / 2))
+  const hex = Array.from(bytes, x => x.toString(16).padStart(2, '0')).join('')
+  return hex.slice(0, length)
+}
+
+/** Random base64url string of exact length (URL-safe). */
+export function randomBase64Url(length = 22): string {
+  return randomString(length, { charset: 'base64url' })
+}
+
+/** Convenience wrappers */
+export function randomAlphanumeric(length = 16): string {
+  return randomString(length, { charset: 'alphanumeric' })
+}
+
+export function randomAlphabetic(length = 16): string {
+  return randomString(length, { charset: 'alphabetic' })
+}
+
+export function randomNumeric(length = 16): string {
+  return randomString(length, { charset: 'numeric' })
+}
+
 export const version = '0.1.0'

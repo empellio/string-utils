@@ -49,12 +49,18 @@ const { slugify, toCamelCase } = require('@empellio/string-utils')
 - `mask(str, options?)` / `center(str, width, padChar?)` / `toFixedLength(str, length, options?)`
 - `initials(str, maxLetters?)`
 - `base64Encode(str)` / `base64Decode(str)` / `base64UrlEncode(str)` / `base64UrlDecode(str)`
+- Random: `randomBytes(n)` / `randomString(n, options?)` / `randomInt(min, max)` / `randomUUID()` / `randomHex(n)` / `randomBase64Url(n)` / `randomAlphanumeric(n)` / `randomAlphabetic(n)` / `randomNumeric(n)`
 - Validators: `isEmail(str)` / `isUUID(str)` / `isURL(str)` / `isHexColor(str)`
 - Extraction: `between(str, start, end, fromIndex?)` / `betweenAll(str, start, end)`
 - `removePunctuation(str)`
 - `template(str, vars, options?)`
 
 Refer to TypeScript types and JSDoc for detailed options and behavior.
+
+## Docs
+
+See the full documentation in `DOCS/`:
+- `DOCS/README.md` (index)
 
 ## License
 
